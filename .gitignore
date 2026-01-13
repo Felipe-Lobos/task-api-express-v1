@@ -17,3 +17,8 @@ pnpm-debug.log*
 .log
 coverage
 .nyc_output
+node_modules/
+.env
+database.db
+*.log
+.DS_Store
