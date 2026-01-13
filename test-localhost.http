@@ -1,9 +1,8 @@
 @baseUrl = http://localhost:{{$dotenv PORT}}
 
-GET {{baseUrl}}/health
 
 ### Test al servidor
-http://localhost:3000/health
+GET {{baseUrl}}/health
 
 ### GET - Obtener todas las tareas
 GET {{baseUrl}}/api/tasks

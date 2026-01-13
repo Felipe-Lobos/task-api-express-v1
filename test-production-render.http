@@ -1,0 +1,33 @@
+@baseUrl = https://task-api-express-v1.onrender.com
+
+
+### Test al servidor
+GET {{baseUrl}}/health
+
+
+### GET - Obtener todas las tareas
+GET {{baseUrl}}/api/tasks
+
+### GET - Obtener task por id
+GET {{baseUrl}}/api/tasks/1
+
+### POST - crear task
+POST {{baseUrl}}/api/tasks
+Content-Type: application/json
+
+{
+    "title": "Aprender Express",
+    "description": "Completar el tutorial de API REST",
+    "completed": false
+}
+
+### PUT - Actualizar una tarea
+PUT {{baseUrl}}/api/tasks/1
+Content-Type: application/json
+
+{
+    "title": "Tarea 1 actualizada"
+}
+
+### DELETE - Eliminar una tarea
+DELETE {{baseUrl}}/api/tasks/3
