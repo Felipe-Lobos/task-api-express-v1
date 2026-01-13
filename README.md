@@ -27,6 +27,21 @@ cp .env.example .env
 npm run dev
 ```
 
+## ⚠️ Nota sobre ramas y base de datos
+
+- **Rama actual (sqlite)**: Esta rama mantiene la implementación con **SQLite** (archivo `database.db` y la dependencia **better-sqlite3**). Es ideal para desarrollo local y pruebas rápidas.
+- **Rama `main` (migración a PostgreSQL)**: La rama `main` será migrada a **PostgreSQL**; allí se actualizarán la configuración, dependencias y scripts de despliegue (por ejemplo, añadir `pg` o un cliente ORM).
+
+## 🧪 Pruebas con REST Client (VS Code)
+
+Sigue estos pasos para ejecutar las pruebas incluidas en la raíz del repositorio:
+
+1. Instala la extensión **REST Client** (por Huachao Mao) en VS Code.
+2. Abre `test-localhost.http` para pruebas locales o `test-production-render.http` para probar el despliegue en producción.
+3. Para pruebas locales, asegúrate de tener el archivo `.env` con `PORT` configurado, o edita la variable `@baseUrl` al inicio del archivo si prefieres usar otro puerto.
+4. Haz clic en "Send Request" arriba de cada petición en el archivo `.http` o usa la paleta de comandos.
+5. Los archivos `.http` contienen ejemplos de GET, POST, PUT y DELETE para los endpoints principales.
+
 ## 🔌 Endpoints
 
 ### Health Check
