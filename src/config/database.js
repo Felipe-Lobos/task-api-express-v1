@@ -1,42 +1,48 @@
-import Database from 'better-sqlite3';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import pg from "pg";
+const { Pool } = pg;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Ruta a la base de datos
-const DB_PATH = process.env.DB_PATH || join(__dirname, '../../database.db');
-
-// Crear conexión a SQLite (síncrona)
-const db = new Database(DB_PATH, { 
-  verbose: process.env.NODE_ENV === 'development' ? console.log : null 
+// Crear pool de conexion
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  // ssl: {
+  //   rejectUnauthorized: false, // Necesario para Neon y otros servicios cloud
+  // },
+  // Configuración opcional para mejor rendimiento
+  max: 20, //maximo de conexiones
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
-console.log('✅ Conectado a SQLite (better-sqlite3)');
+// Evento de conexion exitosa
+pool.on("connect", () => {
+  console.log("✅ Conectado a PostgreSQL localhost:5432");
+});
 
-// Crear tabla de tareas si no existe
-const createTasksTable = () => {
+// Evento de error
+pool.on("error", (err) => {
+  console.error("❌ Error inesperado en PostgreSQL:", err);
+});
+
+const createTaskTable = async () => {
   const sql = `
     CREATE TABLE IF NOT EXISTS tasks (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(100) NOT NULL,
       description TEXT,
-      completed INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      completed BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `;
-
   try {
-    db.exec(sql);
-    console.log('✅ Tabla tasks lista');
+    await pool.query(sql);
+    console.log("✅ Tabla tasks lista");
   } catch (err) {
-    console.error('❌ Error al crear tabla tasks:', err.message);
+    console.error("❌ Error al crear tabla tasks:", err.message);
   }
 };
 
-// Inicializar base de datos
-createTasksTable();
+// Iniciar base de datos
+createTaskTable();
 
-export default db;
+export default pool;

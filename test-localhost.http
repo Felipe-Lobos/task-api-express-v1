@@ -29,4 +29,4 @@ Content-Type: application/json
 }
 
 ### DELETE - Eliminar una tarea
-DELETE {{baseUrl}}/api/tasks/3
+DELETE {{baseUrl}}/api/tasks/2

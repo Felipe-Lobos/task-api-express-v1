@@ -3,9 +3,9 @@ import TaskModel from "../models/taskModel.js";
 
 export const taskController = {
   //obtener todas las tareas
-  getAllTasks: (req, res, next) => {
+  getAllTasks: async (req, res, next) => {
     try {
-      const tasks = TaskModel.getAll();
+      const tasks = await TaskModel.getAll();
 
       res.json({
         success: true,
@@ -18,10 +18,10 @@ export const taskController = {
   },
 
   // Obtener tareas por ID
-  getTaskById: (req, res, next) => {
+  getTaskById: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const task = TaskModel.getById(id);
+      const task = await TaskModel.getById(id);
 
       if (!task) {
         res.status(404);
@@ -38,18 +38,11 @@ export const taskController = {
   },
 
   //Crear nueva tarea
-  createTask: (req, res, next) => {
+  createTask: async (req, res, next) => {
     try {
       //los datos ya vienen validados por zod
       const taskData = req.validatedData;
-
-      // Convertir boolean a integer para SQLite
-      const taskToCreate = {
-        ...taskData,
-        completed: taskData.completed ? 1 : 0,
-      };
-
-      const newTask = TaskModel.create(taskToCreate);
+      const newTask = await TaskModel.create(taskData);
 
       res.status(201).json({
         success: true,
@@ -62,44 +55,36 @@ export const taskController = {
   },
 
   // Actualizar tarea
-  updateTask: (req, res, next) => {
+  updateTask: async (req, res, next) => {
     try {
       const { id } = req.params;
       const taskData = req.validatedData;
 
       // Verificar que la tarea existe
-      const existingTask = TaskModel.getById(id);
+      const existingTask = await TaskModel.getById(id);
       if (!existingTask) {
         res.status(404);
         throw new Error(`Tarea con ID ${id} no encontrada`);
       }
 
-      // Convertir boolean a integer si existe
-      const tasToUpdate = {
-        ...existingTask,
-        ...taskData,
-        ...(taskData.completed !== undefined && {
-          completed: taskData.completed ? 1 : 0,
-        }),
+      // Merge de datos: mantener los antiguos si no se envían nuevos
+      const dataToUpdate = {
+        title: taskData.title || existingTask.title,
+        description:
+          taskData.description !== undefined
+            ? taskData.description
+            : existingTask.description,
+        completed:
+          taskData.completed !== undefined
+            ? taskData.completed
+            : existingTask.completed,
       };
-      // Desestructura primera la tarea existente, luego la sobre escribe
-      // con la nueva tarea, y luego hace una destructuracion de
-      // Si taskData.completed es distinto de undefined  entonces pasa el obj{}
-      // como el {} solo tiene la propiedad completed, eso es lo unico que sobreescribe
 
-      const result = TaskModel.update(id, tasToUpdate);
-
-      if (result.changes === 0) {
-        res.status(400);
-        throw new Error("No se pudo actualizar la tarea");
-      }
-
-      // Obtener la tarea actualizada
-      const updatedTask = TaskModel.getById(id);
+      const updatedTask = await TaskModel.update(id, dataToUpdate);
 
       res.json({
         success: true,
-        message: "Tarea actualziada exitosamente",
+        message: "Tarea actualizada exitosamente",
         data: updatedTask,
       });
     } catch (error) {
@@ -108,28 +93,28 @@ export const taskController = {
   },
 
   // Eliminar tarea
-  deleteTask: (req, res, next) => {
+  deleteTask: async (req, res, next) => {
     try {
       const { id } = req.params;
 
       // Verificar que la tarea existe
-      const existingTask = TaskModel.getById(id);
+      const existingTask = await TaskModel.getById(id);
       if (!existingTask) {
         res.status(404);
         throw new Error(`Tarea con ID ${id} no encontrada`);
       }
-      
-      const result = TaskModel.delete(id)
-      
-      if(result === 0 ){
-        res.status(400)
-        throw new Error("No se pudo eliminar la tarea")
+
+      const result = await TaskModel.delete(id);
+
+      if (!result.deleted) {
+        res.status(400);
+        throw new Error('No se pudo eliminar la tarea');
       }
 
       res.json({
         success: true,
-        message: "Tarea eliminada exitosamente"
-      })
+        message: "Tarea eliminada exitosamente",
+      });
     } catch (error) {
       next(error);
     }

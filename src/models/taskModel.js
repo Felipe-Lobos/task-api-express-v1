@@ -1,57 +1,59 @@
-import db from '../config/database.js';
+import pool from "../config/database.js";
 
 const TaskModel = {
-  // Obtener todas las tareas
-  getAll: () => {
-    const sql = 'SELECT * FROM tasks ORDER BY created_at DESC';
-    return db.prepare(sql).all();
+  //obtener todas las tareas
+  getAll: async () => {
+    const sql = "SELECT * FROM tasks ORDER BY created_at DESC";
+    const result = await pool.query(sql);
+    return result.rows;
   },
 
   // Obtener tarea por ID
-  getById: (id) => {
-    const sql = 'SELECT * FROM tasks WHERE id = ?';
-    return db.prepare(sql).get(id);
+  getById: async (id) => {
+    const sql = "SELECT * FROM tasks WHERE id = $1";
+    const result = await pool.query(sql, [id]);
+    return result.rows[0];
   },
 
-  // Crear nueva tarea
-  create: (taskData) => {
+  // crear tarea nueva
+  create: async (taskData) => {
     const { title, description, completed } = taskData;
     const sql = `
       INSERT INTO tasks (title, description, completed)
-      VALUES (?, ?, ?)
+      VALUES ($1, $2, $3)
+      RETURNING *
     `;
-    
-    const info = db.prepare(sql).run(
-      title, 
-      description || null, 
-      completed || 0
-    );
-    
-    return { id: info.lastInsertRowid, ...taskData };
+    const result = await pool.query(sql, [
+      title,
+      description || null,
+      completed || false,
+    ]);
+
+    return result.rows[0];
   },
 
   // Actualizar tarea
-  update: (id, taskData) => {
+  update: async (id, taskData) => {
     const { title, description, completed } = taskData;
     const sql = `
       UPDATE tasks 
-      SET title = ?, 
-          description = ?, 
-          completed = ?,
+      SET title = $1, 
+          description = $2, 
+          completed = $3,
           updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
+      WHERE id = $4
+      RETURNING *
     `;
-    
-    const info = db.prepare(sql).run(title, description, completed, id);
-    return { changes: info.changes };
-  },
-
+    const result = await pool.query(sql, [title, description, completed, id]);
+    return result.rows[0];
+  }, 
+  
   // Eliminar tarea
-  delete: (id) => {
-    const sql = 'DELETE FROM tasks WHERE id = ?';
-    const info = db.prepare(sql).run(id);
-    return { changes: info.changes };
-  }
+  delete: async (id) => {
+    const sql = "DELETE FROM tasks WHERE id = $1";
+    const result = await pool.query(sql, [id]);
+    return { deleted: result.rowCount > 0 };
+  },
 };
 
 export default TaskModel;
