@@ -1,6 +1,12 @@
-# Task API - Express + SQLite
+# Task API - Express
 
-API REST para gestión de tareas construida con Express.js y SQLite.
+API REST para gestión de tareas construida con Express.js. Por defecto esta rama llamada `postgres` implementa el proyecto usando **PostgreSQL** en local y **sin Prisma**. La versión final del proyecto usará **Prisma** junto con PostgreSQL en un servicio administrado (por ejemplo, **Neon**).
+
+## ℹ️ Nota sobre la rama `postgres`
+
+- La rama `postgres` está pensada para probar PostgreSQL en un entorno local sin depender de Prisma.
+- La configuración y los scripts pueden diferir de la rama principal (por ejemplo, variables de entorno para conexión a Postgres).
+- En la versión final se migrará a **Prisma** y se usará un proveedor de Postgres administrado (p. ej., **Neon**).
 
 ## 🚀 Tecnologías
 
@@ -20,12 +26,32 @@ git clone <tu-repo>
 # Instalar dependencias
 npm install
 
-# Copiar variables de entorno
+# Copiar variables de entorno (si existe)
 cp .env.example .env
 
 # Iniciar servidor desarrollo
 npm run dev
 ```
+
+## ⚙️ Variables de entorno (.env)
+
+Crea un archivo `.env` en la raíz del proyecto con, como mínimo, las siguientes variables:
+
+```env
+# Servidor
+PORT=3000
+NODE_ENV=development
+
+# PostgreSQL (rama `postgres`, local)
+# Formato: postgresql://USUARIO:CONTRASEÑA@HOST:PUERTO/NOMBRE_BD
+DATABASE_URL=postgresql://postgres:password@localhost:5432/taskdb
+```
+
+Notas:
+
+- En la rama principal (SQLite) no es necesario `DATABASE_URL` ya que se usa `database.db` local.
+- Si usas un servicio administrado (ej. **Neon**), utiliza la `DATABASE_URL` que te proporcione el servicio y, si es necesario, habilita SSL en `src/config/database.js` (ver comentario sobre `ssl` en ese archivo).
+- No subas tu `.env` al repositorio; añade el archivo a `.gitignore`.
 
 ## 🔌 Endpoints
 
