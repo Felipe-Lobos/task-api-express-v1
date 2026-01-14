@@ -1,5 +1,6 @@
 import { success } from "zod";
 import TaskModel from "../models/taskModel.js";
+import { Prisma } from '@prisma/client';
 
 export const taskController = {
   //obtener todas las tareas
@@ -60,27 +61,7 @@ export const taskController = {
       const { id } = req.params;
       const taskData = req.validatedData;
 
-      // Verificar que la tarea existe
-      const existingTask = await TaskModel.getById(id);
-      if (!existingTask) {
-        res.status(404);
-        throw new Error(`Tarea con ID ${id} no encontrada`);
-      }
-
-      // Merge de datos: mantener los antiguos si no se envían nuevos
-      const dataToUpdate = {
-        title: taskData.title || existingTask.title,
-        description:
-          taskData.description !== undefined
-            ? taskData.description
-            : existingTask.description,
-        completed:
-          taskData.completed !== undefined
-            ? taskData.completed
-            : existingTask.completed,
-      };
-
-      const updatedTask = await TaskModel.update(id, dataToUpdate);
+      const updatedTask = await TaskModel.update(id, taskData);
 
       res.json({
         success: true,
@@ -88,6 +69,13 @@ export const taskController = {
         data: updatedTask,
       });
     } catch (error) {
+      // Manejar error de registro no encontrado
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          res.status(404);
+          return next(new Error(`Tarea con ID ${req.params.id} no encontrada`));
+        }
+      }
       next(error);
     }
   },
@@ -96,26 +84,20 @@ export const taskController = {
   deleteTask: async (req, res, next) => {
     try {
       const { id } = req.params;
-
-      // Verificar que la tarea existe
-      const existingTask = await TaskModel.getById(id);
-      if (!existingTask) {
-        res.status(404);
-        throw new Error(`Tarea con ID ${id} no encontrada`);
-      }
-
-      const result = await TaskModel.delete(id);
-
-      if (!result.deleted) {
-        res.status(400);
-        throw new Error('No se pudo eliminar la tarea');
-      }
+      await TaskModel.delete(id);
 
       res.json({
         success: true,
         message: "Tarea eliminada exitosamente",
       });
     } catch (error) {
+      // Manejar error de registro no encontrado
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          res.status(404);
+          return next(new Error(`Tarea con ID ${req.params.id} no encontrada`));
+        }
+      }
       next(error);
     }
   },

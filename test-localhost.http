@@ -28,5 +28,15 @@ Content-Type: application/json
     "title": "Tarea 1 actualizada"
 }
 
+### PUT - Actualizar una tarea
+PUT {{baseUrl}}/api/tasks/1
+Content-Type: application/json
+
+{
+    "title": "Tarea 1 actualizada -  completada",
+    "description": "Tarea completada exitosamente",
+    "completed": true,
+    "campoextra":"asd"
+}
 ### DELETE - Eliminar una tarea
 DELETE {{baseUrl}}/api/tasks/2

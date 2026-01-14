@@ -1,58 +1,47 @@
-import pool from "../config/database.js";
+import prisma from "../config/prisma.js";
 
 const TaskModel = {
-  //obtener todas las tareas
+  // Obtener todas las tareas
   getAll: async () => {
-    const sql = "SELECT * FROM tasks ORDER BY created_at DESC";
-    const result = await pool.query(sql);
-    return result.rows;
+    return await prisma.task.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
   },
 
-  // Obtener tarea por ID
+  // Obtener tareas por ID
   getById: async (id) => {
-    const sql = "SELECT * FROM tasks WHERE id = $1";
-    const result = await pool.query(sql, [id]);
-    return result.rows[0];
+    return await prisma.task.findUnique({
+      where: { id: parseInt(id) },
+    });
   },
 
-  // crear tarea nueva
+  // Crear nueva tarea
   create: async (taskData) => {
-    const { title, description, completed } = taskData;
-    const sql = `
-      INSERT INTO tasks (title, description, completed)
-      VALUES ($1, $2, $3)
-      RETURNING *
-    `;
-    const result = await pool.query(sql, [
-      title,
-      description || null,
-      completed || false,
-    ]);
-
-    return result.rows[0];
+    return await prisma.task.create({
+      data: {
+        title: taskData.title,
+        description: taskData.description || null,
+        completed: taskData.completed || false,
+      },
+    });
   },
 
   // Actualizar tarea
   update: async (id, taskData) => {
-    const { title, description, completed } = taskData;
-    const sql = `
-      UPDATE tasks 
-      SET title = $1, 
-          description = $2, 
-          completed = $3,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE id = $4
-      RETURNING *
-    `;
-    const result = await pool.query(sql, [title, description, completed, id]);
-    return result.rows[0];
-  }, 
-  
+    return await prisma.task.update({
+      where: { id: parseInt(id) },
+      data: taskData,
+    });
+  },
+
   // Eliminar tarea
   delete: async (id) => {
-    const sql = "DELETE FROM tasks WHERE id = $1";
-    const result = await pool.query(sql, [id]);
-    return { deleted: result.rowCount > 0 };
+    await prisma.task.delete({
+      where: { id: parseInt(id) },
+    });
+    return { deleted: true };
   },
 };
 

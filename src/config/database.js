@@ -4,9 +4,9 @@ const { Pool } = pg;
 // Crear pool de conexion
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  // ssl: {
-  //   rejectUnauthorized: false, // Necesario para Neon y otros servicios cloud
-  // },
+  ssl: {
+    rejectUnauthorized: false, // Necesario para Neon y otros servicios cloud
+  },
   // Configuración opcional para mejor rendimiento
   max: 20, //maximo de conexiones
   idleTimeoutMillis: 30000,
@@ -15,7 +15,7 @@ const pool = new Pool({
 
 // Evento de conexion exitosa
 pool.on("connect", () => {
-  console.log("✅ Conectado a PostgreSQL localhost:5432");
+  console.log("✅ Conectado a PostgreSQL (Neon)");
 });
 
 // Evento de error
