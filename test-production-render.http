@@ -1,9 +1,7 @@
 @baseUrl = https://task-api-express-v1.onrender.com
 
-
 ### Test al servidor
 GET {{baseUrl}}/health
-
 
 ### GET - Obtener todas las tareas
 GET {{baseUrl}}/api/tasks
@@ -22,12 +20,22 @@ Content-Type: application/json
 }
 
 ### PUT - Actualizar una tarea
-PUT {{baseUrl}}/api/tasks/1
+PUT {{baseUrl}}/api/tasks/4
 Content-Type: application/json
 
 {
     "title": "Tarea 1 actualizada"
 }
 
+### PUT - Actualizar una tarea
+PUT {{baseUrl}}/api/tasks/1
+Content-Type: application/json
+
+{
+    "title": "Tarea 1 actualizada -  completada",
+    "description": "Tarea completada exitosamente",
+    "completed": true,
+    "campoextra":"asd"
+}
 ### DELETE - Eliminar una tarea
-DELETE {{baseUrl}}/api/tasks/3
+DELETE {{baseUrl}}/api/tasks/2

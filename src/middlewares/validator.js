@@ -7,7 +7,7 @@ export const createTaskSchema = z.object({
     .max(100, 'El título no puede tener más de 100 caracteres'),
   description: z.string()
     .max(500, 'La descripción no puede tener más de 500 caracteres')
-    .optional(),
+    .nullish,
   completed: z.boolean()
     .optional()
     .default(false)
@@ -21,7 +21,7 @@ export const updateTaskSchema = z.object({
     .optional(),
   description: z.string()
     .max(500, 'La descripción no puede tener más de 500 caracteres')
-    .optional(),
+    .nullish(),
   completed: z.boolean()
     .optional()
 });
@@ -38,7 +38,7 @@ export const validate = (schema) => {
         return res.status(400).json({
           success: false,
           message: 'Errores de validación',
-          errors: error.errors.map(err => ({
+          errors: error.issues.map(err => ({
             field: err.path.join('.'),
             message: err.message
           }))
